@@ -1,2 +1,14 @@
 # Let-s-trade
-This is the one trade app where U can do it all state of the art trades in one spot no more switch app our platforms it's done he at let's trade made by big boss bushman Damien Garry tattersall spectrum design and brother 
+Minimal Next.js app bootstrap for the Let’s Trade concept.
+
+## Run locally
+
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
+2. Start development server:
+   ```bash
+   npm run dev
+   ```
+3. Open `http://localhost:3000`.
