@@ -230,7 +230,7 @@ class MemoryRepository {
   async getPublishedPolicy(tenantId: string, requestedPolicyId?: string) {
     const selected = requestedPolicyId
       ? this.state.policies.find((entry) => entry.tenantId === tenantId && entry.id === requestedPolicyId && entry.status === 'published')
-      : this.state.policies.find((entry) => entry.tenantId === tenantId && entry.status === 'published') ?? this.state.policies.find((entry) => entry.tenantId === tenantId);
+      : this.state.policies.find((entry) => entry.tenantId === tenantId && entry.status === 'published');
     return selected ? normalizePolicy(selected) : null;
   }
 
@@ -277,6 +277,13 @@ class MemoryRepository {
     const policy = this.state.policies.find((entry) => entry.tenantId === tenantId && entry.id === policyId);
     if (!policy) {
       return null;
+    }
+
+    for (const otherPolicy of this.state.policies) {
+      if (otherPolicy.tenantId === tenantId && otherPolicy.id !== policyId && otherPolicy.status === 'published') {
+        otherPolicy.status = 'archived';
+        otherPolicy.updatedAt = nowIso();
+      }
     }
 
     policy.status = 'published';
@@ -462,12 +469,7 @@ class PrismaRepository {
     }
 
     const publishedPolicy = await this.prisma!.policy.findFirst({ where: { tenantId, status: 'PUBLISHED' }, orderBy: { updatedAt: 'desc' } });
-    if (publishedPolicy) {
-      return this.mapPolicy(publishedPolicy);
-    }
-
-    const fallbackPolicy = await this.prisma!.policy.findFirst({ where: { tenantId }, orderBy: { updatedAt: 'desc' } });
-    return fallbackPolicy ? this.mapPolicy(fallbackPolicy) : null;
+    return publishedPolicy ? this.mapPolicy(publishedPolicy) : null;
   }
 
   async savePolicy(tenantId: string, policyId: string | null, payload: Omit<PolicyRecord, 'id' | 'tenantId' | 'version' | 'status' | 'createdAt' | 'updatedAt' | 'publishedAt'> & { status?: PolicyRecord['status'] }, actor: ActorContext) {
@@ -526,6 +528,7 @@ class PrismaRepository {
     if (!existingPolicy) {
       return null;
     }
+    await this.prisma!.policy.updateMany({ where: { tenantId, status: 'PUBLISHED', NOT: { id: existingPolicy.id } }, data: { status: 'ARCHIVED' } });
     const policy = await this.prisma!.policy.update({ where: { id: existingPolicy.id }, data: { status: 'PUBLISHED', publishedAt: new Date() } });
     await this.prisma!.auditEvent.create({
       data: {

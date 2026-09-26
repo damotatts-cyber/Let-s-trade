@@ -61,7 +61,17 @@ export async function resolveAdminRequestSession(request: Request): Promise<{ ac
   };
 }
 
+
+function assertMockLoginEnabled() {
+  if (process.env.NODE_ENV !== 'production' && process.env.GUARDRAIL_ALLOW_INSECURE_DEV_SESSION === 'true') {
+    return;
+  }
+
+  throw new Error('Mock admin bootstrap login is disabled. Configure real auth or explicitly set GUARDRAIL_ALLOW_INSECURE_DEV_SESSION=true in non-production mode.');
+}
+
 export async function establishAdminSession(tenantSlug: string, email: string, role: ActorContext['role'] = 'ADMIN') {
+  assertMockLoginEnabled();
   const repository = getGuardrailRepository();
   const bootstrapped = await repository.bootstrap(tenantSlug || DEMO_TENANT_SLUG, email || DEMO_ADMIN_EMAIL, role);
   return {
