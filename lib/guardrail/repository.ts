@@ -511,7 +511,6 @@ class PrismaRepository {
       data: {
         tenantId,
         actorUserId: actorUser?.id,
-        actorEmail: actor.email,
         policyId: policy.id,
         eventType: policyId ? 'POLICY_UPDATED' : 'POLICY_CREATED',
         entityType: 'policy',

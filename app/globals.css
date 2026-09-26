@@ -34,6 +34,11 @@ button {
   font-weight: 700;
 }
 
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
 input,
 textarea {
   width: 100%;

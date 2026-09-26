@@ -88,7 +88,6 @@ CREATE TABLE "AuditEvent" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "tenantId" TEXT NOT NULL,
     "actorUserId" TEXT,
-    "actorEmail" TEXT NOT NULL,
     "requestId" TEXT,
     "policyId" TEXT,
     "eventType" TEXT NOT NULL,

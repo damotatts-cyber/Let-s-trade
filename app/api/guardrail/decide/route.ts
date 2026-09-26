@@ -23,6 +23,8 @@ export async function POST(request: Request) {
       redactions: requestRecord.redactions,
     });
   } catch (error) {
-    return NextResponse.json({ error: error instanceof Error ? error.message : 'Guardrail decision failed' }, { status: 400 });
+    const message = error instanceof Error ? error.message : 'Guardrail decision failed';
+    const status = /unauthorized|required unless/i.test(message) ? 401 : 400;
+    return NextResponse.json({ error: message }, { status });
   }
 }
