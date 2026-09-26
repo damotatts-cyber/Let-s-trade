@@ -12,3 +12,163 @@ body {
 * {
   box-sizing: border-box;
 }
+
+a {
+  color: #67e8f9;
+  text-decoration: underline;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+button {
+  border: 0;
+  border-radius: 0.75rem;
+  padding: 0.8rem 1rem;
+  cursor: pointer;
+  background: #22c55e;
+  color: #04110a;
+  font-weight: 700;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+input,
+textarea {
+  width: 100%;
+  margin-top: 0.35rem;
+  padding: 0.75rem;
+  border-radius: 0.75rem;
+  border: 1px solid #3f3f46;
+  background: #111827;
+  color: #f4f4f5;
+}
+
+.guardrail-shell {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 2rem;
+  display: grid;
+  gap: 1rem;
+}
+
+.guardrail-card {
+  background: #18181b;
+  border: 1px solid #27272a;
+  border-radius: 1rem;
+  padding: 1.25rem;
+}
+
+.guardrail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+  gap: 1rem;
+}
+
+.guardrail-metric-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: 1rem;
+}
+
+.guardrail-metric {
+  background: #111827;
+  border: 1px solid #1f2937;
+  border-radius: 1rem;
+  padding: 1rem;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.guardrail-metric span {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.guardrail-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.guardrail-list li {
+  display: grid;
+  gap: 0.25rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #27272a;
+}
+
+.guardrail-form {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.guardrail-inline-form {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.guardrail-inline-form label {
+  min-width: 16rem;
+}
+
+.guardrail-nav {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.guardrail-kicker,
+.guardrail-muted {
+  color: #a1a1aa;
+}
+
+.guardrail-error {
+  color: #fca5a5;
+}
+
+.guardrail-pre {
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-x: auto;
+  padding: 0.75rem;
+  border-radius: 0.75rem;
+  background: #0f172a;
+}
+
+.guardrail-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.guardrail-table th,
+.guardrail-table td {
+  padding: 0.75rem;
+  border-bottom: 1px solid #27272a;
+  vertical-align: top;
+  text-align: left;
+}
+
+@media (max-width: 640px) {
+  .guardrail-shell {
+    padding: 1rem;
+  }
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid #67e8f9;
+  outline-offset: 2px;
+}

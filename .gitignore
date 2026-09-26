@@ -3,3 +3,7 @@ node_modules
 out
 npm-debug.log*
 .DS_Store
+.env
+prisma/*.db
+prisma/*.db-journal
+tsconfig.tsbuildinfo
