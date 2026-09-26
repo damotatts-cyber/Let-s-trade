@@ -456,10 +456,18 @@ class PrismaRepository {
   }
 
   async getPublishedPolicy(tenantId: string, requestedPolicyId?: string) {
-    const policy = requestedPolicyId
-      ? await this.prisma!.policy.findFirst({ where: { tenantId, id: requestedPolicyId } })
-      : await this.prisma!.policy.findFirst({ where: { tenantId }, orderBy: [{ status: 'asc' }, { updatedAt: 'desc' }] });
-    return policy ? this.mapPolicy(policy) : null;
+    if (requestedPolicyId) {
+      const explicitPolicy = await this.prisma!.policy.findFirst({ where: { tenantId, id: requestedPolicyId } });
+      return explicitPolicy ? this.mapPolicy(explicitPolicy) : null;
+    }
+
+    const publishedPolicy = await this.prisma!.policy.findFirst({ where: { tenantId, status: 'PUBLISHED' }, orderBy: { updatedAt: 'desc' } });
+    if (publishedPolicy) {
+      return this.mapPolicy(publishedPolicy);
+    }
+
+    const fallbackPolicy = await this.prisma!.policy.findFirst({ where: { tenantId }, orderBy: { updatedAt: 'desc' } });
+    return fallbackPolicy ? this.mapPolicy(fallbackPolicy) : null;
   }
 
   async savePolicy(tenantId: string, policyId: string | null, payload: Omit<PolicyRecord, 'id' | 'tenantId' | 'version' | 'status' | 'createdAt' | 'updatedAt' | 'publishedAt'> & { status?: PolicyRecord['status'] }, actor: ActorContext) {
@@ -473,9 +481,14 @@ class PrismaRepository {
       createdByUserId: actorUser?.id,
     };
 
+    const existingPolicy = policyId ? await this.prisma!.policy.findFirst({ where: { id: policyId, tenantId } }) : null;
+    if (policyId && !existingPolicy) {
+      return null;
+    }
+
     const policy = policyId
       ? await this.prisma!.policy.update({
-          where: { id: policyId },
+          where: { id: existingPolicy!.id },
           data: {
             ...data,
             version: { increment: 1 },
@@ -509,7 +522,11 @@ class PrismaRepository {
 
   async publishPolicy(tenantId: string, policyId: string, actor: ActorContext) {
     const actorUser = await this.getUserByEmail(tenantId, actor.email);
-    const policy = await this.prisma!.policy.update({ where: { id: policyId }, data: { status: 'PUBLISHED', publishedAt: new Date() } });
+    const existingPolicy = await this.prisma!.policy.findFirst({ where: { id: policyId, tenantId } });
+    if (!existingPolicy) {
+      return null;
+    }
+    const policy = await this.prisma!.policy.update({ where: { id: existingPolicy.id }, data: { status: 'PUBLISHED', publishedAt: new Date() } });
     await this.prisma!.auditEvent.create({
       data: {
         tenantId,
@@ -599,7 +616,11 @@ class PrismaRepository {
 
   async reviewRequest(tenantId: string, requestId: string, reason: string, actor: ActorContext) {
     const actorUser = await this.getUserByEmail(tenantId, actor.email);
-    const request = await this.prisma!.guardrailRequest.update({ where: { id: requestId }, data: { reviewStatus: 'REVIEWED', reviewReason: reason, reviewedAt: new Date() }, include: { redactions: true, actorUser: true } });
+    const existingRequest = await this.prisma!.guardrailRequest.findFirst({ where: { id: requestId, tenantId } });
+    if (!existingRequest) {
+      return null;
+    }
+    const request = await this.prisma!.guardrailRequest.update({ where: { id: existingRequest.id }, data: { reviewStatus: 'REVIEWED', reviewReason: reason, reviewedAt: new Date() }, include: { redactions: true, actorUser: true } });
     await this.prisma!.auditEvent.create({
       data: {
         tenantId,

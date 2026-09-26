@@ -11,6 +11,18 @@ const SECRET_VALUE_PATTERNS = [
   /-----BEGIN [A-Z ]+-----[\s\S]+?-----END [A-Z ]+-----/g,
 ];
 
+function getSessionSecret(): string {
+  if (process.env.SESSION_SECRET) {
+    return process.env.SESSION_SECRET;
+  }
+
+  if (process.env.NODE_ENV !== 'production' && process.env.GUARDRAIL_ALLOW_INSECURE_DEV_SESSION === 'true') {
+    return 'guardrail-gate-dev-secret';
+  }
+
+  throw new Error('SESSION_SECRET is required unless GUARDRAIL_ALLOW_INSECURE_DEV_SESSION=true in non-production mode');
+}
+
 export function hashValue(input: string): string {
   return createHash('sha256').update(input).digest('hex');
 }
@@ -105,7 +117,7 @@ export function createPreview(value: unknown, maxLength = 180): string {
 }
 
 export function signSession(payload: ActorContext & { tenantSlug: string }): string {
-  const secret = process.env.SESSION_SECRET ?? 'guardrail-gate-dev-secret';
+  const secret = getSessionSecret();
   const encoded = Buffer.from(JSON.stringify(payload), 'utf8').toString('base64url');
   const signature = createHmac('sha256', secret).update(encoded).digest('hex');
   return `${encoded}.${signature}`;
@@ -131,7 +143,7 @@ export function readSessionCookie(cookieHeader: string | null | undefined): (Act
     return null;
   }
 
-  const secret = process.env.SESSION_SECRET ?? 'guardrail-gate-dev-secret';
+  const secret = getSessionSecret();
   const expected = createHmac('sha256', secret).update(encoded).digest('hex');
 
   if (!timingSafeEqual(Buffer.from(signature), Buffer.from(expected))) {

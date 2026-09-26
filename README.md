@@ -39,7 +39,7 @@ Because the repo started as a very small single-app Next.js project, Guardrail G
    ```bash
    npm install
    ```
-2. Copy the environment file:
+2. Copy the environment file and either set `SESSION_SECRET` or keep the explicit local-only insecure dev flag from the template:
    ```bash
    cp .env.example .env
    ```
@@ -63,7 +63,8 @@ Because the repo started as a very small single-app Next.js project, Guardrail G
 | Variable | Required | Purpose |
 | --- | --- | --- |
 | `DATABASE_URL` | No | Enables Prisma-backed persistence; otherwise mock persistence is used. |
-| `SESSION_SECRET` | No | Signs the local admin session cookie. |
+| `SESSION_SECRET` | No | Signs the local admin session cookie. Strongly recommended outside local development. |
+| `GUARDRAIL_ALLOW_INSECURE_DEV_SESSION` | No | Set to `true` only for explicit non-production local mock login when `SESSION_SECRET` is unset. |
 | `GUARDRAIL_SHARED_TOKEN` | No | If set, `POST /api/guardrail/decide` requires a matching bearer token. |
 | `CLOUDFLARE_ACCOUNT_ID` / `CLOUDFLARE_API_TOKEN` | No | Cloudflare detector adapter boundary. When unset, local heuristics remain authoritative. |
 | `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` | No | AWS detector adapter boundary. When unset, local heuristics remain authoritative. |

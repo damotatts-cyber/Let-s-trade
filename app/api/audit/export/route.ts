@@ -5,7 +5,8 @@ import { getGuardrailRepository } from '@/lib/guardrail/repository';
 
 function escapeCell(value: unknown) {
   const serialized = typeof value === 'string' ? value : JSON.stringify(value);
-  return `"${serialized.replaceAll('"', '""')}"`;
+  const neutralized = /^[=+\-@]/.test(serialized) ? `'${serialized}` : serialized;
+  return `"${neutralized.replaceAll('\"', '\"\"')}"`;
 }
 
 export async function GET(request: Request) {
