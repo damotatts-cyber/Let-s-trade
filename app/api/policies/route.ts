@@ -15,6 +15,10 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
+  if (session.actor.role !== 'ADMIN') {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
+
   const repository = getGuardrailRepository();
   const policies = await repository.listPolicies(session.tenant.tenantId);
   return NextResponse.json({ policies });

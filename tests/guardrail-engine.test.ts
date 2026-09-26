@@ -32,6 +32,14 @@ describe('guardrail evaluation', () => {
     expect(tampered).toBeNull();
   });
 
+  it('expires stale sessions', () => {
+    process.env.GUARDRAIL_ALLOW_INSECURE_DEV_SESSION = 'true';
+    delete process.env.SESSION_SECRET;
+
+    const expired = signSession({ email: 'admin@guardrail.local', role: 'ADMIN', authMode: 'cookie', tenantSlug: 'demo-tenant' }, -1000);
+    expect(readSessionCookie(`guardrail_gate_session=${expired}`)).toBeNull();
+  });
+
   it('redacts sensitive fields and hashes originals', () => {
     const payload = { authorization: '******', nested: { password: 'top-secret' } };
     const { sanitized, redactions } = sanitizePayload(payload, ['authorization', 'password']);

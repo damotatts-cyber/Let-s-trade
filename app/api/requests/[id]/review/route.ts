@@ -14,6 +14,10 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
+  if (!['ADMIN', 'REVIEWER'].includes(session.actor.role)) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
+
   try {
     const body = schema.parse(await request.json());
     const { id } = await params;

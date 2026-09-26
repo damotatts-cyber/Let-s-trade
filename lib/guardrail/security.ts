@@ -116,9 +116,10 @@ export function createPreview(value: unknown, maxLength = 180): string {
   return compact.length <= maxLength ? compact : `${compact.slice(0, maxLength - 1)}…`;
 }
 
-export function signSession(payload: ActorContext & { tenantSlug: string }): string {
+export function signSession(payload: ActorContext & { tenantSlug: string }, ttlMs = 1000 * 60 * 60 * 12): string {
   const secret = getSessionSecret();
-  const encoded = Buffer.from(JSON.stringify(payload), 'utf8').toString('base64url');
+  const issuedAt = Date.now();
+  const encoded = Buffer.from(JSON.stringify({ ...payload, issuedAt, expiresAt: issuedAt + ttlMs }), 'utf8').toString('base64url');
   const signature = createHmac('sha256', secret).update(encoded).digest('hex');
   return `${encoded}.${signature}`;
 }
@@ -153,7 +154,11 @@ export function readSessionCookie(cookieHeader: string | null | undefined): (Act
   }
 
   try {
-    return JSON.parse(Buffer.from(encoded, 'base64url').toString('utf8')) as ActorContext & { tenantSlug: string };
+    const parsed = JSON.parse(Buffer.from(encoded, 'base64url').toString('utf8')) as (ActorContext & { tenantSlug: string; expiresAt?: number });
+    if (typeof parsed.expiresAt !== 'number' || parsed.expiresAt < Date.now()) {
+      return null;
+    }
+    return parsed;
   } catch {
     return null;
   }
