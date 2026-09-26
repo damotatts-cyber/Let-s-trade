@@ -7,6 +7,14 @@ import { getGuardrailRepository } from '@/lib/guardrail/repository';
 import { hashValue, readSessionCookie } from '@/lib/guardrail/security';
 import type { ActorContext, TenantContext } from '@/lib/guardrail/types';
 
+
+function assertMockGatewayEnabled() {
+  if (process.env.NODE_ENV !== 'production' && process.env.GUARDRAIL_ALLOW_INSECURE_GATEWAY === 'true') {
+    return;
+  }
+
+  throw new Error('Gateway bearer auth is required unless GUARDRAIL_ALLOW_INSECURE_GATEWAY=true in non-production mode.');
+}
 export async function resolveAdminSession(): Promise<{ actor: ActorContext; tenant: TenantContext } | null> {
   const cookieStore = await cookies();
   const session = readSessionCookie(
@@ -99,9 +107,11 @@ export async function resolveGatewaySession(request: Request): Promise<{ actor: 
     if (providedDigest.length !== expectedDigest.length || !timingSafeEqual(providedDigest, expectedDigest)) {
       throw new Error('Unauthorized: missing or invalid bearer token');
     }
+  } else {
+    assertMockGatewayEnabled();
   }
 
-  const bootstrapped = await repository.bootstrap(tenantSlug, email, 'ADMIN');
+  const bootstrapped = await repository.bootstrap(tenantSlug, email, 'ANALYST');
   return {
     actor: {
       email: bootstrapped.user.email,

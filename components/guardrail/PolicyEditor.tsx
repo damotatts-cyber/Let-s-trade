@@ -91,7 +91,11 @@ export default function PolicyEditor({ policy, simulatePath }: { policy: PolicyR
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ requestType: 'prompt', prompt: testPrompt, source: 'admin-console-test' }),
       });
-      const body = (await response.json()) as { decision?: string; riskScore?: number; matchedRules?: Array<{ message: string }> };
+      const body = (await response.json()) as { decision?: string; riskScore?: number; matchedRules?: Array<{ message: string }>; error?: string };
+      if (!response.ok) {
+        setResult(body.error ?? 'Simulation failed');
+        return;
+      }
       setResult(`${body.decision ?? 'unknown'} · risk ${body.riskScore ?? 'n/a'} · ${(body.matchedRules ?? []).map((rule) => rule.message).join(' | ')}`);
     } catch {
       setResult('Unable to test policy');

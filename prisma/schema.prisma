@@ -104,6 +104,7 @@ model GuardrailRequest {
   requestId       String
   tenantId        String
   actorUserId     String?
+  actorEmail      String
   policyId        String?
   requestType     RequestType
   modelProvider   String?

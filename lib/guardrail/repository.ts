@@ -511,6 +511,7 @@ class PrismaRepository {
       data: {
         tenantId,
         actorUserId: actorUser?.id,
+        actorEmail: actor.email,
         policyId: policy.id,
         eventType: policyId ? 'POLICY_UPDATED' : 'POLICY_CREATED',
         entityType: 'policy',
@@ -534,6 +535,7 @@ class PrismaRepository {
       data: {
         tenantId,
         actorUserId: actorUser?.id,
+        actorEmail: actor.email,
         policyId,
         eventType: 'POLICY_PUBLISHED',
         entityType: 'policy',
@@ -551,6 +553,7 @@ class PrismaRepository {
         requestId: evaluation.requestId,
         tenantId,
         actorUserId: actorUser?.id,
+        actorEmail: actor.email,
         policyId,
         requestType: requestType === 'prompt' ? 'PROMPT' : 'TOOL_CALL',
         source,
@@ -716,6 +719,7 @@ class PrismaRepository {
     requestId: string;
     tenantId: string;
     actorUser?: { email: string } | null;
+    actorEmail: string;
     policyId: string | null;
     requestType: string;
     toolName: string | null;
@@ -739,7 +743,7 @@ class PrismaRepository {
       id: request.id,
       requestId: request.requestId,
       tenantId: request.tenantId,
-      actorEmail: request.actorUser?.email ?? DEMO_ADMIN_EMAIL,
+      actorEmail: request.actorEmail,
       policyId: request.policyId,
       requestType: request.requestType === 'PROMPT' ? 'prompt' : 'tool_call',
       toolName: request.toolName,

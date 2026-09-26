@@ -146,7 +146,9 @@ export function readSessionCookie(cookieHeader: string | null | undefined): (Act
   const secret = getSessionSecret();
   const expected = createHmac('sha256', secret).update(encoded).digest('hex');
 
-  if (!timingSafeEqual(Buffer.from(signature), Buffer.from(expected))) {
+  const providedSignature = Buffer.from(signature);
+  const expectedSignature = Buffer.from(expected);
+  if (providedSignature.length !== expectedSignature.length || !timingSafeEqual(providedSignature, expectedSignature)) {
     return null;
   }
 
