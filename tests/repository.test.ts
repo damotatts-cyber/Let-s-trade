@@ -3,7 +3,6 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { getGuardrailRepository } from '@/lib/guardrail/repository';
 
 beforeEach(() => {
-  // @ts-expect-error reset test singleton
   global.__guardrailMemoryStore = undefined;
   delete process.env.DATABASE_URL;
 });

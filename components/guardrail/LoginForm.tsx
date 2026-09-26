@@ -1,10 +1,12 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 import { DEMO_ADMIN_EMAIL, DEMO_TENANT_SLUG } from '@/lib/guardrail/defaults';
 
 export default function LoginForm() {
+  const router = useRouter();
   const [tenantSlug, setTenantSlug] = useState(DEMO_TENANT_SLUG);
   const [email, setEmail] = useState(DEMO_ADMIN_EMAIL);
   const [error, setError] = useState('');
@@ -28,7 +30,8 @@ export default function LoginForm() {
         return;
       }
 
-      window.location.href = '/dashboard';
+      router.push('/dashboard');
+      router.refresh();
     } catch {
       setError('Network error. Please try again.');
     } finally {

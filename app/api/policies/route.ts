@@ -42,6 +42,9 @@ export async function POST(request: Request) {
       },
       session.actor,
     );
+    if (!policy) {
+      return NextResponse.json({ error: 'Unable to create policy' }, { status: 500 });
+    }
     return NextResponse.json({ id: policy.id, policy }, { status: 201 });
   } catch (error) {
     return NextResponse.json({ error: error instanceof Error ? error.message : 'Unable to create policy' }, { status: 400 });

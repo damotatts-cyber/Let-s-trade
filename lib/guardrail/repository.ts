@@ -135,7 +135,6 @@ function createSeedState(): SeedState {
 }
 
 declare global {
-  // eslint-disable-next-line no-var
   var __guardrailMemoryStore: SeedState | undefined;
 }
 
@@ -185,7 +184,7 @@ class MemoryRepository {
 
     let policy = this.state.policies.find((entry) => entry.tenantId === tenant.id && entry.status === 'published');
     if (!policy) {
-      policy = this.state.policies.find((entry) => entry.tenantId === tenant.id) ?? null;
+      policy = this.state.policies.find((entry) => entry.tenantId === tenant.id);
     }
 
     if (!policy) {

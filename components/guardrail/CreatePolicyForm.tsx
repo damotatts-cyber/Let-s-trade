@@ -1,8 +1,10 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function CreatePolicyForm() {
+  const router = useRouter();
   const [name, setName] = useState('New draft policy');
   const [message, setMessage] = useState('');
 
@@ -19,7 +21,8 @@ export default function CreatePolicyForm() {
       setMessage(body?.error ?? 'Unable to create policy');
       return;
     }
-    window.location.href = `/policies/${body.id}`;
+    router.push(`/policies/${body.id}`);
+    router.refresh();
   }
 
   return (

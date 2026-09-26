@@ -57,7 +57,8 @@ export function sanitizePayload(value: unknown, sensitiveFields: string[], jsonP
   }
 
   if (typeof value === 'string') {
-    return redactStringValue(value, jsonPath);
+    const redacted = redactStringValue(value, jsonPath);
+    return { sanitized: redacted.value, redactions: redacted.redactions };
   }
 
   if (typeof value !== 'object') {
