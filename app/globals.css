@@ -15,7 +15,7 @@ body {
 
 a {
   color: #67e8f9;
-  text-decoration: none;
+  text-decoration: underline;
 }
 
 button,

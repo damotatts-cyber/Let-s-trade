@@ -11,7 +11,7 @@ function linesToList(input: string) {
     .filter(Boolean);
 }
 
-export default function PolicyEditor({ policy }: { policy: PolicyRecord }) {
+export default function PolicyEditor({ policy, simulatePath }: { policy: PolicyRecord; simulatePath: string }) {
   const [name, setName] = useState(policy.name);
   const [description, setDescription] = useState(policy.description ?? '');
   const [blockedPromptPatterns, setBlockedPromptPatterns] = useState(policy.rules.blockedPromptPatterns.join('\n'));
@@ -86,14 +86,10 @@ export default function PolicyEditor({ policy }: { policy: PolicyRecord }) {
     setPending(true);
     setResult('');
     try {
-      const response = await fetch('/api/guardrail/decide', {
+      const response = await fetch(simulatePath, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-tenant-slug': 'demo-tenant',
-          'x-actor-email': 'admin@guardrail.local',
-        },
-        body: JSON.stringify({ requestType: 'prompt', prompt: testPrompt, policyId: policy.id, source: 'admin-console-test' }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ requestType: 'prompt', prompt: testPrompt, source: 'admin-console-test' }),
       });
       const body = (await response.json()) as { decision?: string; riskScore?: number; matchedRules?: Array<{ message: string }> };
       setResult(`${body.decision ?? 'unknown'} · risk ${body.riskScore ?? 'n/a'} · ${(body.matchedRules ?? []).map((rule) => rule.message).join(' | ')}`);

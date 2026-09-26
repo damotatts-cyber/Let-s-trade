@@ -6,3 +6,4 @@ npm-debug.log*
 .env
 prisma/*.db
 prisma/*.db-journal
+tsconfig.tsbuildinfo

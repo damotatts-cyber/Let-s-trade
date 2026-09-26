@@ -229,7 +229,7 @@ class MemoryRepository {
 
   async getPublishedPolicy(tenantId: string, requestedPolicyId?: string) {
     const selected = requestedPolicyId
-      ? this.state.policies.find((entry) => entry.tenantId === tenantId && entry.id === requestedPolicyId)
+      ? this.state.policies.find((entry) => entry.tenantId === tenantId && entry.id === requestedPolicyId && entry.status === 'published')
       : this.state.policies.find((entry) => entry.tenantId === tenantId && entry.status === 'published') ?? this.state.policies.find((entry) => entry.tenantId === tenantId);
     return selected ? normalizePolicy(selected) : null;
   }
@@ -457,7 +457,7 @@ class PrismaRepository {
 
   async getPublishedPolicy(tenantId: string, requestedPolicyId?: string) {
     if (requestedPolicyId) {
-      const explicitPolicy = await this.prisma!.policy.findFirst({ where: { tenantId, id: requestedPolicyId } });
+      const explicitPolicy = await this.prisma!.policy.findFirst({ where: { tenantId, id: requestedPolicyId, status: 'PUBLISHED' } });
       return explicitPolicy ? this.mapPolicy(explicitPolicy) : null;
     }
 

@@ -1,3 +1,4 @@
+import { timingSafeEqual } from 'node:crypto';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 
@@ -83,7 +84,9 @@ export async function resolveGatewaySession(request: Request): Promise<{ actor: 
 
   if (configuredSharedToken) {
     const provided = authorization?.startsWith('Bearer ') ? authorization.slice('Bearer '.length) : '';
-    if (hashValue(provided) !== hashValue(configuredSharedToken)) {
+    const providedDigest = Buffer.from(hashValue(provided), 'hex');
+    const expectedDigest = Buffer.from(hashValue(configuredSharedToken), 'hex');
+    if (providedDigest.length !== expectedDigest.length || !timingSafeEqual(providedDigest, expectedDigest)) {
       throw new Error('Unauthorized: missing or invalid bearer token');
     }
   }

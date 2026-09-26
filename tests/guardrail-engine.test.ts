@@ -25,5 +25,6 @@ describe('guardrail evaluation', () => {
     expect(sanitized).toEqual({ authorization: '[REDACTED_FIELD]', nested: { password: '[REDACTED_FIELD]' } });
     expect(redactions).toHaveLength(2);
     expect(redactions[0]?.originalHash).toBe(hashValue(JSON.stringify('******')));
+    expect(redactions[1]?.originalHash).toBe(hashValue(JSON.stringify('top-secret')));
   });
 });

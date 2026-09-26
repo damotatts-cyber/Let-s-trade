@@ -17,7 +17,7 @@ export default async function PolicyPage({ params }: { params: Promise<{ id: str
 
   return (
     <AdminShell title={policy.name} subtitle={`Status ${policy.status} · version ${policy.version} · update thresholds and test adversarial prompts inline.`}>
-      <PolicyEditor policy={policy} />
+      <PolicyEditor policy={policy} simulatePath={`/api/policies/${policy.id}/simulate`} />
     </AdminShell>
   );
 }
