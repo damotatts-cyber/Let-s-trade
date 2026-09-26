@@ -1,0 +1,169 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  REVIEWER
+  ANALYST
+}
+
+enum PolicyStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum RequestType {
+  PROMPT
+  TOOL_CALL
+}
+
+enum DecisionOutcome {
+  PASS
+  REDACT
+  BLOCK
+}
+
+enum ReviewStatus {
+  PENDING
+  REVIEWED
+}
+
+enum AuditEventType {
+  REQUEST_DECISION
+  RULE_MATCH
+  POLICY_CREATED
+  POLICY_UPDATED
+  POLICY_PUBLISHED
+  REQUEST_REVIEWED
+  LOGIN_SUCCEEDED
+}
+
+model Tenant {
+  id               String             @id @default(cuid())
+  slug             String             @unique
+  name             String
+  sharedSecretHash String?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  users            User[]
+  policies         Policy[]
+  requests         GuardrailRequest[]
+  auditEvents      AuditEvent[]
+}
+
+model User {
+  id             String             @id @default(cuid())
+  tenantId       String
+  email          String
+  name           String?
+  role           UserRole           @default(ADMIN)
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+  tenant         Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdPolicies Policy[]          @relation("PoliciesCreated")
+  requests       GuardrailRequest[] @relation("ActorRequests")
+  auditEvents    AuditEvent[]       @relation("ActorAuditEvents")
+
+  @@unique([tenantId, email])
+  @@index([tenantId, role])
+}
+
+model Policy {
+  id             String             @id @default(cuid())
+  tenantId       String
+  name           String
+  description    String?
+  status         PolicyStatus       @default(DRAFT)
+  version        Int                @default(1)
+  thresholds     Json
+  rules          Json
+  actions        Json
+  lastTestResult Json?
+  createdByUserId String?
+  publishedAt    DateTime?
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+  tenant         Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdByUser  User?              @relation("PoliciesCreated", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  requests       GuardrailRequest[]
+  auditEvents    AuditEvent[]
+
+  @@index([tenantId, status])
+  @@index([tenantId, updatedAt])
+}
+
+model GuardrailRequest {
+  id              String             @id @default(cuid())
+  requestId       String             @unique
+  tenantId        String
+  actorUserId     String?
+  policyId        String?
+  requestType     RequestType
+  modelProvider   String?
+  toolName        String?
+  source          String?
+  inputHash       String
+  inputPreview    String
+  sanitizedPayload Json
+  decision        DecisionOutcome
+  riskScore       Float
+  riskBreakdown   Json
+  matchedRules    Json
+  detectorResults Json
+  hardBlock       Boolean            @default(false)
+  reviewStatus    ReviewStatus       @default(PENDING)
+  reviewReason    String?
+  reviewedAt      DateTime?
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+  tenant          Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  actorUser       User?              @relation("ActorRequests", fields: [actorUserId], references: [id], onDelete: SetNull)
+  policy          Policy?            @relation(fields: [policyId], references: [id], onDelete: SetNull)
+  redactions      RequestRedaction[]
+  auditEvents     AuditEvent[]
+
+  @@index([tenantId, createdAt])
+  @@index([tenantId, decision, createdAt])
+  @@index([tenantId, requestType, createdAt])
+}
+
+model RequestRedaction {
+  id           String           @id @default(cuid())
+  requestId    String
+  jsonPath     String
+  originalHash String
+  replacement  String
+  reason       String
+  createdAt    DateTime         @default(now())
+  request      GuardrailRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+
+  @@index([requestId, createdAt])
+}
+
+model AuditEvent {
+  id          String         @id @default(cuid())
+  tenantId    String
+  actorUserId String?
+  requestId   String?
+  policyId    String?
+  eventType   AuditEventType
+  entityType  String
+  entityId    String
+  payload     Json
+  createdAt   DateTime       @default(now())
+  tenant      Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  actorUser   User?          @relation("ActorAuditEvents", fields: [actorUserId], references: [id], onDelete: SetNull)
+  request     GuardrailRequest? @relation(fields: [requestId], references: [id], onDelete: SetNull)
+  policy      Policy?        @relation(fields: [policyId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId, createdAt])
+  @@index([requestId, createdAt])
+  @@index([policyId, createdAt])
+}
