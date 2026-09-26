@@ -106,7 +106,7 @@ CREATE UNIQUE INDEX "User_tenantId_email_key" ON "User"("tenantId", "email");
 CREATE INDEX "User_tenantId_role_idx" ON "User"("tenantId", "role");
 CREATE INDEX "Policy_tenantId_status_idx" ON "Policy"("tenantId", "status");
 CREATE INDEX "Policy_tenantId_updatedAt_idx" ON "Policy"("tenantId", "updatedAt");
-CREATE UNIQUE INDEX "GuardrailRequest_requestId_key" ON "GuardrailRequest"("requestId");
+CREATE UNIQUE INDEX "GuardrailRequest_tenantId_requestId_key" ON "GuardrailRequest"("tenantId", "requestId");
 CREATE INDEX "GuardrailRequest_tenantId_createdAt_idx" ON "GuardrailRequest"("tenantId", "createdAt");
 CREATE INDEX "GuardrailRequest_tenantId_decision_createdAt_idx" ON "GuardrailRequest"("tenantId", "decision", "createdAt");
 CREATE INDEX "GuardrailRequest_tenantId_requestType_createdAt_idx" ON "GuardrailRequest"("tenantId", "requestType", "createdAt");

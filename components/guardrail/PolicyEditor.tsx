@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 
 import type { PolicyRecord } from '@/lib/guardrail/repository';
 
@@ -24,7 +24,7 @@ export default function PolicyEditor({ policy, simulatePath }: { policy: PolicyR
   const [result, setResult] = useState<string>('');
   const [pending, setPending] = useState(false);
 
-  const thresholds = useMemo(() => policy.thresholds, [policy.thresholds]);
+  const [thresholds, setThresholds] = useState(policy.thresholds);
 
   async function save() {
     setPending(true);
@@ -133,9 +133,18 @@ export default function PolicyEditor({ policy, simulatePath }: { policy: PolicyR
           <textarea value={sensitiveFields} onChange={(event) => setSensitiveFields(event.target.value)} rows={4} />
         </label>
         <div className="guardrail-metric-grid">
-          <div className="guardrail-metric"><strong>Prompt injection</strong><span>{thresholds.promptInjection}</span></div>
-          <div className="guardrail-metric"><strong>Data leak</strong><span>{thresholds.dataLeak}</span></div>
-          <div className="guardrail-metric"><strong>Unsafe tool</strong><span>{thresholds.unsafeTool}</span></div>
+          <label className="guardrail-metric">
+            <strong>Prompt injection threshold</strong>
+            <input type="number" min="0" max="1" step="0.01" value={thresholds.promptInjection} onChange={(event) => setThresholds((current) => ({ ...current, promptInjection: Number(event.target.value) }))} />
+          </label>
+          <label className="guardrail-metric">
+            <strong>Data leak threshold</strong>
+            <input type="number" min="0" max="1" step="0.01" value={thresholds.dataLeak} onChange={(event) => setThresholds((current) => ({ ...current, dataLeak: Number(event.target.value) }))} />
+          </label>
+          <label className="guardrail-metric">
+            <strong>Unsafe tool threshold</strong>
+            <input type="number" min="0" max="1" step="0.01" value={thresholds.unsafeTool} onChange={(event) => setThresholds((current) => ({ ...current, unsafeTool: Number(event.target.value) }))} />
+          </label>
         </div>
         <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
           <button type="button" disabled={pending} onClick={save}>Save draft</button>

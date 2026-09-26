@@ -101,7 +101,7 @@ model Policy {
 
 model GuardrailRequest {
   id              String             @id @default(cuid())
-  requestId       String             @unique
+  requestId       String
   tenantId        String
   actorUserId     String?
   policyId        String?
@@ -129,6 +129,7 @@ model GuardrailRequest {
   redactions      RequestRedaction[]
   auditEvents     AuditEvent[]
 
+  @@unique([tenantId, requestId])
   @@index([tenantId, createdAt])
   @@index([tenantId, decision, createdAt])
   @@index([tenantId, requestType, createdAt])

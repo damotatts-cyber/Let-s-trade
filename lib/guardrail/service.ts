@@ -11,7 +11,11 @@ export async function enforceBodyLimit(request: Request) {
 }
 
 export async function readGatewayPayload(request: Request): Promise<GatewayRequestPayload & { policyId?: string; source?: string }> {
-  const parsed = await request.json();
+  const rawBody = await request.text();
+  if (Buffer.byteLength(rawBody, 'utf8') > MAX_BODY_BYTES) {
+    throw new Error(`Payload exceeds ${MAX_BODY_BYTES} bytes`);
+  }
+  const parsed = JSON.parse(rawBody) as Record<string, unknown>;
   const payload = gatewayRequestSchema.parse(parsed);
   return {
     ...payload,

@@ -159,3 +159,11 @@ textarea {
     padding: 1rem;
   }
 }
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid #67e8f9;
+  outline-offset: 2px;
+}
